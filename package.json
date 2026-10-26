@@ -1,0 +1,22 @@
+{
+  "name": "health-record",
+  "version": "1.0.0",
+  "description": "health-record 健康档案 —— 家庭健康数据管理（Node + Express 后端 + 原生前端）",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "keywords": [
+    "health",
+    "express",
+    "rest-api",
+    "vanilla-js"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
