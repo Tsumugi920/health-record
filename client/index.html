@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>health-record 健康档案</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫀</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <div class="brand">
+        <span class="logo">🫀</span>
+        <div class="brand-text">
+          <h1>health-record 健康档案</h1>
+          <p>家庭健康数据管理 · 指标 / 体检 / 用药 / 就诊</p>
+        </div>
+      </div>
+      <div class="member-box">
+        <div class="member-top">
+          <label for="memberSelect">当前成员</label>
+          <select id="memberSelect"></select>
+        </div>
+        <div id="memberMeta" class="member-meta"></div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs-wrap">
+    <div class="container">
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="metrics">📏 健康指标</button>
+        <button class="tab" data-tab="records">📋 体检报告</button>
+        <button class="tab" data-tab="meds">💊 用药提醒</button>
+        <button class="tab" data-tab="visits">🏥 就诊记录</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- 健康指标 -->
+    <section id="panel-metrics" class="panel active">
+      <div class="panel-grid">
+        <div class="card">
+          <h2>录入健康指标</h2>
+          <form id="metricForm" class="form">
+            <div class="form-row">
+              <label>成员
+                <select name="memberId" id="metricMember"></select>
+              </label>
+              <label>指标类型
+                <select name="type" id="metricType">
+                  <option value="血压">血压（mmHg）</option>
+                  <option value="血糖">血糖（mmol/L）</option>
+                  <option value="体重">体重（kg）</option>
+                  <option value="心率">心率（次/分）</option>
+                  <option value="体温">体温（℃）</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row">
+              <label><span id="valueLabelText">收缩压</span>
+                <input type="number" name="value" step="0.1" min="0" required placeholder="如 135" />
+              </label>
+              <label id="value2Wrap">舒张压
+                <input type="number" name="value2" step="0.1" min="0" placeholder="如 85" />
+              </label>
+            </div>
+            <div class="form-row">
+              <label>测量日期
+                <input type="date" name="recordedAt" required />
+              </label>
+              <label>备注
+                <input type="text" name="note" placeholder="如：晨起测量" />
+              </label>
+            </div>
+            <button type="submit" class="btn primary">保存指标</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>趋势图</h2>
+            <select id="chartType" title="选择图表展示的指标类型">
+              <option value="血压">血压</option>
+              <option value="血糖">血糖</option>
+              <option value="体重">体重</option>
+              <option value="心率">心率</option>
+              <option value="体温">体温</option>
+            </select>
+          </div>
+          <div id="metricStats" class="stat-chips"></div>
+          <canvas id="trendChart" class="trend-chart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>最近指标记录</h2>
+        <table class="table" id="metricTable">
+          <thead>
+            <tr><th>日期</th><th>类型</th><th>数值</th><th>备注</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 体检报告 -->
+    <section id="panel-records" class="panel">
+      <div class="panel-grid">
+        <div class="card">
+          <h2>添加体检报告</h2>
+          <form id="recordForm" class="form">
+            <label>成员
+              <select name="memberId" id="recordMember"></select>
+            </label>
+            <label>报告标题
+              <input name="title" required placeholder="如：2026年度体检" />
+            </label>
+            <div class="form-row">
+              <label>体检机构
+                <input name="org" placeholder="如：市第一人民医院" />
+              </label>
+              <label>体检日期
+                <input type="date" name="checkDate" required />
+              </label>
+            </div>
+            <label>总体结论 / 医生建议
+              <textarea name="summary" rows="3" placeholder="总体结论、医生建议…"></textarea>
+            </label>
+            <label>检查明细（每行一条：项目|结果|单位|提示）
+              <textarea name="items" rows="4" placeholder="血压|128/82|mmHg|正常&#10;总胆固醇|5.2|mmol/L|正常"></textarea>
+            </label>
+            <button type="submit" class="btn primary">保存报告</button>
+          </form>
+        </div>
+        <div class="card">
+          <h2>报告列表</h2>
+          <div id="recordList" class="card-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 用药提醒 -->
+    <section id="panel-meds" class="panel">
+      <div class="panel-grid">
+        <div class="card">
+          <h2>设置用药提醒</h2>
+          <form id="medForm" class="form">
+            <label>成员
+              <select name="memberId" id="medMember"></select>
+            </label>
+            <label>药品名称
+              <input name="drugName" required placeholder="如：苯磺酸氨氯地平片" />
+            </label>
+            <div class="form-row">
+              <label>每次剂量
+                <input name="dosage" placeholder="如：5mg/次" />
+              </label>
+              <label>服用频次
+                <select name="frequency" id="medFrequency">
+                  <option value="每日1次">每日1次</option>
+                  <option value="每日2次" selected>每日2次</option>
+                  <option value="每日3次">每日3次</option>
+                </select>
+              </label>
+            </div>
+            <div id="medTimes" class="times-row"></div>
+            <div class="form-row">
+              <label>开始日期
+                <input type="date" name="startDate" required />
+              </label>
+              <label>结束日期
+                <input type="date" name="endDate" title="留空表示长期服用" />
+              </label>
+            </div>
+            <label>备注
+              <input name="note" placeholder="如：早餐后服用" />
+            </label>
+            <button type="submit" class="btn primary">添加提醒</button>
+          </form>
+        </div>
+        <div class="card">
+          <h2>提醒列表</h2>
+          <div id="medList" class="card-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 就诊记录 -->
+    <section id="panel-visits" class="panel">
+      <div class="panel-grid">
+        <div class="card">
+          <h2>添加就诊记录</h2>
+          <form id="visitForm" class="form">
+            <label>成员
+              <select name="memberId" id="visitMember"></select>
+            </label>
+            <div class="form-row">
+              <label>就诊日期
+                <input type="date" name="date" required />
+              </label>
+              <label>费用（元）
+                <input type="number" name="cost" step="0.01" min="0" placeholder="0.00" />
+              </label>
+            </div>
+            <div class="form-row">
+              <label>医院
+                <input name="hospital" required placeholder="如：市第一人民医院" />
+              </label>
+              <label>科室
+                <input name="department" placeholder="如：心血管内科" />
+              </label>
+            </div>
+            <label>医生
+              <input name="doctor" placeholder="如：陈明远 主任医师" />
+            </label>
+            <label>诊断结论
+              <input name="diagnosis" required placeholder="如：原发性高血压" />
+            </label>
+            <label>处置 / 处方
+              <textarea name="treatment" rows="3" placeholder="治疗方案、处方、复查计划…"></textarea>
+            </label>
+            <label>备注
+              <input name="note" />
+            </label>
+            <button type="submit" class="btn primary">保存记录</button>
+          </form>
+        </div>
+        <div class="card">
+          <h2>就诊记录列表</h2>
+          <div id="visitList" class="card-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>health-record 健康档案 · 数据保存于 server/data.json · 今天是 <span id="today"></span></p>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/records.js"></script>
+  <script src="js/meds.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
